@@ -1,0 +1,30 @@
+---
+import { getEmDashEntry, getSeoMeta } from "emdash";
+import { PortableText } from "emdash/ui";
+import Base from "../../layouts/Base.astro";
+
+const slug = Astro.params.slug;
+if (!slug) return Astro.redirect("/");
+
+const { entry: page, cacheHint } = await getEmDashEntry("pages", slug);
+if (!page) return Astro.redirect("/");
+
+try { Astro.cache.set(cacheHint); } catch {}
+
+const seo = page.data.seo ? getSeoMeta(page.data.seo) : {};
+---
+
+<Base
+	title={seo.title || page.data.title || "Page"}
+	description={seo.description}
+	content={{ collection: "pages", id: page.data.id, slug: page.id }}
+>
+	<section class="section">
+		<div class="section-inner" style="max-width: 800px;">
+			<h1 style="font-family: var(--font-heading); font-size: 2.5rem; color: var(--elk-green); text-transform: uppercase; margin-bottom: 30px;">
+				{page.data.title}
+			</h1>
+			{page.data.content && <PortableText value={page.data.content} />}
+		</div>
+	</section>
+</Base>
