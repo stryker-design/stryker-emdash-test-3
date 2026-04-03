@@ -1,448 +1,341 @@
 ---
-import { getEmDashCollection, getEntryTerms } from "emdash";
-import { Image } from "emdash/ui";
-import Base from "../layouts/Base.astro";
-import PostCard from "../components/PostCard.astro";
-import { getReadingTime } from "../utils/reading-time";
+// Standalone Elk Horn homepage - no layout dependency
+import { EmDashHead, EmDashBodyStart, EmDashBodyEnd } from "emdash/ui";
+import { createPublicPageContext } from "emdash/page";
 
-const { entries: posts, cacheHint } = await getEmDashCollection("posts");
-
-Astro.cache.set(cacheHint);
-
-const sortedPosts = posts.toSorted((a, b) => {
-	const dateA = a.data.publishedAt?.getTime() ?? 0;
-	const dateB = b.data.publishedAt?.getTime() ?? 0;
-	return dateB - dateA;
+const pageCtx = createPublicPageContext({
+	Astro,
+	kind: "custom",
+	pageType: "website",
+	title: "Elk Horn Painting — Professional Painting Services in Castle Rock & Denver",
+	description: "Elk Horn Painting provides expert exterior, interior, cabinet painting and more in Castle Rock & Denver, Colorado. Licensed & insured. Free estimates.",
+	siteName: "Elk Horn Painting",
 });
-
-// Find the first post with a featured image for the hero
-const featuredPost = sortedPosts.find((p) => p.data.featured_image);
-const featuredIndex = featuredPost ? sortedPosts.indexOf(featuredPost) : -1;
-
-// Get remaining posts (exclude featured if found, limit to 6 for grid)
-const gridPosts = sortedPosts.filter((_, i) => i !== featuredIndex).slice(0, 6);
-
-// Total posts shown = featured (if any) + grid posts
-const totalShown = (featuredPost ? 1 : 0) + gridPosts.length;
-const hasMorePosts = sortedPosts.length > totalShown;
-
-// Fetch tags for featured post (bylines are already hydrated by getEmDashCollection)
-let featuredTags: Array<{ slug: string; label: string }> = [];
-const featuredBylines = featuredPost?.data.bylines ?? [];
-if (featuredPost) {
-	const tags = await getEntryTerms("posts", featuredPost.data.id, "tag");
-	featuredTags = tags.map((t) => ({ slug: t.slug, label: t.label }));
-}
-
-// Fetch tags for grid posts (bylines are already hydrated by getEmDashCollection)
-const gridPostsWithTags = await Promise.all(
-	gridPosts.map(async (post) => {
-		const tags = await getEntryTerms("posts", post.data.id, "tag");
-		const bylines = post.data.bylines ?? [];
-		return {
-			post,
-			tags: tags.map((t) => ({ slug: t.slug, label: t.label })),
-			bylines,
-		};
-	})
-);
-
-// Format date helper
-function formatDate(date: Date | null | undefined) {
-	if (!date) return null;
-	return date.toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
-}
 ---
 
-<Base title="My Blog" description="Welcome to my blog">
-	{
-		posts.length === 0 ? (
-			<section class="empty-state">
-				<h2>No posts yet</h2>
-				<p>Create your first post in the admin panel.</p>
-				<a href="/_emdash/admin/content/posts/new" class="btn">
-					Create a post
-				</a>
-			</section>
-		) : (
-			<div class="home-content">
-				{/* Featured Post - Side by side */}
-				{featuredPost && (
-					<section class="featured-section">
-						<div class="featured-grid">
-							<a href={`/posts/${featuredPost.id}`} class="featured-image-link">
-								<div class="featured-image">
-									<Image image={featuredPost.data.featured_image} />
-								</div>
-							</a>
-							<div class="featured-content">
-								<div class="featured-meta">
-									{featuredBylines.length > 0 && (
-										<>
-											<div class="featured-bylines">
-												{featuredBylines.slice(0, 2).map((credit, index) => (
-													<>
-														{index > 0 && <span class="byline-sep">,</span>}
-														<span class="featured-byline">
-															{credit.byline.avatarMediaId && (
-																<img
-																	src={`/_emdash/api/media/file/${credit.byline.avatarMediaId}`}
-																	alt={credit.byline.displayName}
-																	class="featured-byline-avatar"
-																/>
-															)}
-															<span class="featured-byline-name">
-																{credit.byline.displayName}
-															</span>
-														</span>
-													</>
-												))}
-												{featuredBylines.length > 2 && (
-													<span class="byline-more">
-														+{featuredBylines.length - 2}
-													</span>
-												)}
-											</div>
-											<span class="meta-dot" />
-										</>
-									)}
-									{formatDate(featuredPost.data.publishedAt) && (
-										<time>{formatDate(featuredPost.data.publishedAt)}</time>
-									)}
-									<span class="meta-dot" />
-									<span>
-										{getReadingTime(featuredPost.data.content)} min read
-									</span>
-								</div>
-								<a
-									href={`/posts/${featuredPost.id}`}
-									class="featured-title-link"
-								>
-									<h1 class="featured-title">{featuredPost.data.title}</h1>
-								</a>
-								{featuredPost.data.excerpt && (
-									<p class="featured-excerpt">{featuredPost.data.excerpt}</p>
-								)}
-								{featuredTags.length > 0 && (
-									<div class="featured-tags">
-										{featuredTags.map((tag) => (
-											<a href={`/tag/${tag.slug}`} class="featured-tag">
-												{tag.label}
-											</a>
-										))}
-									</div>
-								)}
-							</div>
-						</div>
-					</section>
-				)}
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Elk Horn Painting — Professional Painting in Castle Rock & Denver</title>
+	<EmDashHead context={pageCtx} />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+	<style>
+		*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+		:root{--green:#2C4A3E;--green-dark:#1a2e26;--orange:#E87722;--orange-hover:#d16a1e;--white:#ffffff;--off-white:#f5f5f0;--gray:#666;--light-gray:#e0e0e0}
+		body{font-family:'Open Sans',sans-serif;color:#333;line-height:1.6}
+		h1,h2,h3,h4{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.02em;line-height:1.2}
+		a{color:inherit;text-decoration:none}
 
-				{/* Latest Posts */}
-				{gridPostsWithTags.length > 0 && (
-					<section class="posts-section">
-						<header class="section-header">
-							<h2 class="section-title">Latest</h2>
-							{hasMorePosts && (
-								<a href="/posts" class="section-link">
-									View all
-								</a>
-							)}
-						</header>
-						<div class="posts-grid">
-							{gridPostsWithTags.map(({ post, tags, bylines }) => (
-								<PostCard
-									title={post.data.title ?? "Untitled"}
-									excerpt={post.data.excerpt}
-									featuredImage={post.data.featured_image}
-									href={`/posts/${post.id}`}
-									date={post.data.publishedAt ?? undefined}
-									readingTime={getReadingTime(post.data.content)}
-									tags={tags}
-									bylines={bylines}
-								/>
-							))}
-						</div>
-					</section>
-				)}
+		/* Top Bar */
+		.top-bar{background:var(--green-dark);color:var(--white);padding:8px 0;font-size:13px;overflow:hidden}
+		.top-bar-inner{display:flex;gap:32px;justify-content:center;flex-wrap:nowrap;white-space:nowrap}
+		.review-badge{opacity:0.9}
+
+		/* Nav */
+		.site-header{background:var(--white);box-shadow:0 2px 8px rgba(0,0,0,0.08);position:sticky;top:0;z-index:100}
+		.nav-inner{max-width:1200px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+		.site-logo{display:flex;flex-direction:column;align-items:center;line-height:1}
+		.logo-text{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:var(--green);letter-spacing:2px}
+		.logo-sub{font-family:'Oswald',sans-serif;font-size:14px;font-weight:400;color:var(--orange);letter-spacing:4px;text-transform:uppercase}
+		.nav-links{display:flex;gap:28px}
+		.nav-links a{font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--green);transition:color 0.2s}
+		.nav-links a:hover{color:var(--orange)}
+		.phone-cta{display:flex;align-items:center;gap:8px;background:var(--orange);color:var(--white);padding:10px 20px;border-radius:6px;font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;transition:background 0.2s}
+		.phone-cta:hover{background:var(--orange-hover)}
+
+		/* Hero */
+		.hero{position:relative;min-height:85vh;display:flex;align-items:center;overflow:hidden}
+		.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(0.35)}
+		.hero-inner{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:60px 24px;display:grid;grid-template-columns:1fr 420px;gap:60px;align-items:center;width:100%}
+		.hero-content{color:var(--white)}
+		.hero-content h1{font-size:52px;font-weight:700;margin-bottom:20px}
+		.hero-content h1 span{color:var(--orange)}
+		.hero-content>p{font-size:18px;opacity:0.9;margin-bottom:24px;line-height:1.7}
+		.hero-badges{display:flex;gap:16px;flex-wrap:wrap}
+		.hero-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);padding:8px 16px;border-radius:6px;font-size:14px;font-weight:600;color:var(--white)}
+
+		/* Lead Form */
+		.lead-form{background:var(--white);border-radius:12px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+		.lead-form h3{font-family:'Oswald',sans-serif;font-size:24px;color:var(--green);margin-bottom:4px;text-transform:uppercase}
+		.form-sub{font-size:14px;color:var(--gray);margin-bottom:20px}
+		.form-group{margin-bottom:14px}
+		.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 16px;border:2px solid var(--light-gray);border-radius:8px;font-size:15px;font-family:'Open Sans',sans-serif;transition:border-color 0.2s}
+		.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--orange)}
+		.btn-submit{width:100%;padding:14px;background:var(--orange);color:var(--white);border:none;border-radius:8px;font-family:'Oswald',sans-serif;font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:background 0.2s}
+		.btn-submit:hover{background:var(--orange-hover)}
+
+		/* Sections */
+		.section{padding:80px 0}
+		.section-alt{background:var(--off-white)}
+		.section-inner{max-width:1200px;margin:0 auto;padding:0 24px}
+		.section-header{text-align:center;margin-bottom:48px}
+		.section-header h2{font-size:38px;color:var(--green);margin-bottom:12px}
+		.section-divider{width:60px;height:4px;background:var(--orange);margin:0 auto 16px}
+		.section-header>p{font-size:17px;color:var(--gray);max-width:600px;margin:0 auto}
+
+		/* Services */
+		.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+		.service-card{background:var(--white);border-radius:12px;padding:32px 24px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.06);transition:transform 0.2s,box-shadow 0.2s;border:2px solid transparent}
+		.service-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.1);border-color:var(--orange)}
+		.service-card-icon{font-size:40px;margin-bottom:16px}
+		.service-card h3{font-size:18px;color:var(--green);margin-bottom:10px}
+		.service-card p{font-size:14px;color:var(--gray);line-height:1.6}
+
+		/* Trust */
+		.trust-row{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;padding:20px 0}
+		.trust-badge{display:flex;align-items:center;gap:12px}
+		.trust-badge-icon{font-size:32px}
+		.trust-badge-text{font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;color:var(--green);text-transform:uppercase}
+
+		/* Testimonials */
+		.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+		.testimonial-card{background:var(--white);border-radius:12px;padding:28px;box-shadow:0 4px 16px rgba(0,0,0,0.06);border-left:4px solid var(--orange)}
+		.testimonial-stars{color:var(--orange);font-size:18px;margin-bottom:12px}
+		.testimonial-quote{font-size:15px;color:#444;line-height:1.7;margin-bottom:16px;font-style:italic}
+		.testimonial-author{display:flex;justify-content:space-between;align-items:center}
+		.testimonial-name{font-weight:700;color:var(--green)}
+		.testimonial-source{font-size:13px;color:var(--gray);background:var(--off-white);padding:4px 10px;border-radius:12px}
+
+		/* CTA Banner */
+		.cta-banner{background:var(--green);color:var(--white);padding:60px 0;text-align:center}
+		.cta-banner h2{font-size:36px;margin-bottom:12px;color:var(--white)}
+		.cta-banner p{font-size:18px;opacity:0.9;margin-bottom:28px}
+		.cta-btn{display:inline-block;background:var(--orange);color:var(--white);padding:16px 40px;border-radius:8px;font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;text-transform:uppercase;letter-spacing:1px;transition:background 0.2s}
+		.cta-btn:hover{background:var(--orange-hover)}
+
+		/* Contact */
+		.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+		.contact-info h3{font-size:22px;color:var(--green);margin-bottom:24px}
+		.contact-item{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start}
+		.contact-icon{font-size:24px;flex-shrink:0;width:36px;text-align:center}
+		.contact-item strong{display:block;color:var(--green);margin-bottom:2px}
+		.contact-item p{margin:0;color:var(--gray)}
+		.contact-item a{color:var(--orange)}
+
+		/* Footer */
+		.site-footer{background:var(--green-dark);color:var(--white);padding:60px 0 30px}
+		.footer-inner{max-width:1200px;margin:0 auto;padding:0 24px}
+		.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:40px}
+		.footer-logo-text{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;letter-spacing:2px;margin-bottom:12px}
+		.footer-brand p{font-size:14px;opacity:0.7;margin-bottom:6px}
+		.footer-nav h4{font-family:'Oswald',sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;color:var(--orange)}
+		.footer-nav ul{list-style:none}
+		.footer-nav li{margin-bottom:8px}
+		.footer-nav a{font-size:14px;opacity:0.7;transition:opacity 0.2s}
+		.footer-nav a:hover{opacity:1;color:var(--orange)}
+		.footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;text-align:center;font-size:13px;opacity:0.6}
+		.powered-by{margin-top:4px}
+		.powered-by a{color:var(--orange)}
+
+		/* Responsive */
+		@media(max-width:768px){
+			.hero-inner{grid-template-columns:1fr;gap:32px;padding:40px 20px}
+			.hero-content h1{font-size:36px}
+			.contact-grid{grid-template-columns:1fr}
+			.footer-grid{grid-template-columns:1fr}
+			.nav-links{display:none}
+			.trust-row{flex-direction:column;align-items:center;gap:20px}
+		}
+	</style>
+</head>
+<body>
+	<EmDashBodyStart context={pageCtx} />
+
+	<!-- Top Review Bar -->
+	<div class="top-bar">
+		<div class="top-bar-inner">
+			<span class="review-badge">⭐⭐⭐⭐⭐ Google</span>
+			<span class="review-badge">⭐⭐⭐⭐⭐ Angi</span>
+			<span class="review-badge">⭐⭐⭐⭐⭐ Yelp</span>
+			<span class="review-badge">⭐⭐⭐⭐⭐ Nextdoor</span>
+			<span class="review-badge">⭐⭐⭐⭐⭐ Facebook</span>
+		</div>
+	</div>
+
+	<!-- Navigation -->
+	<header class="site-header">
+		<nav class="nav-inner">
+			<a href="/" class="site-logo">
+				<span class="logo-text">ELK HORN</span>
+				<span class="logo-sub">PAINTING</span>
+			</a>
+			<div class="nav-links">
+				<a href="#services">Services</a>
+				<a href="#reviews">Reviews</a>
+				<a href="#contact">Contact</a>
 			</div>
-		)
-	}
-</Base>
+			<a href="tel:7205071738" class="phone-cta">
+				<span>📞</span>
+				<span>(720) 507-1738</span>
+			</a>
+		</nav>
+	</header>
 
-<style>
-	.home-content {
-		max-width: var(--wide-width);
-		margin: 0 auto;
-		padding: var(--spacing-16) var(--spacing-6);
-	}
+	<!-- Hero Section -->
+	<section class="hero">
+		<div class="hero-bg" style="background-image: url('https://images.pexels.com/photos/8961438/pexels-photo-8961438.jpeg?auto=compress&cs=tinysrgb&w=1920');"></div>
+		<div class="hero-inner">
+			<div class="hero-content">
+				<h1>CASTLE ROCK &amp; DENVER'S<br/><span>MOST TRUSTED</span><br/>PAINTING COMPANY</h1>
+				<p>Transforming homes and businesses with expert craftsmanship, premium materials, and attention to detail since day one.</p>
+				<div class="hero-badges">
+					<div class="hero-badge">✓ Licensed &amp; Insured</div>
+					<div class="hero-badge">✓ Free Estimates</div>
+					<div class="hero-badge">✓ 5-Star Rated</div>
+				</div>
+			</div>
+			<div class="lead-form">
+				<h3>Get Your Free Estimate</h3>
+				<p class="form-sub">No obligation — we'll get back to you within 24 hours</p>
+				<form>
+					<div class="form-group"><input type="text" placeholder="Full Name" required /></div>
+					<div class="form-group"><input type="tel" placeholder="Phone Number" required /></div>
+					<div class="form-group"><input type="email" placeholder="Email Address" /></div>
+					<div class="form-group">
+						<select>
+							<option value="">Select Service Needed</option>
+							<option value="exterior">Exterior Painting</option>
+							<option value="interior">Interior Painting</option>
+							<option value="cabinet">Cabinet Painting</option>
+							<option value="staining">Fence &amp; Deck Staining</option>
+							<option value="commercial">Commercial Painting</option>
+						</select>
+					</div>
+					<div class="form-group"><textarea rows="3" placeholder="Tell us about your project..."></textarea></div>
+					<button type="submit" class="btn-submit">Get My Free Estimate →</button>
+				</form>
+			</div>
+		</div>
+	</section>
 
-	/* Featured Section - Side by side */
-	.featured-section {
-		margin-bottom: var(--spacing-16);
-	}
+	<!-- Services Section -->
+	<section class="section section-alt" id="services">
+		<div class="section-inner">
+			<div class="section-header">
+				<h2>Our Services</h2>
+				<div class="section-divider"></div>
+				<p>From interior refreshes to full exterior transformations — we do it all with precision and care.</p>
+			</div>
+			<div class="services-grid">
+				<div class="service-card"><div class="service-card-icon">🏠</div><h3>Exterior Painting</h3><p>Transform your home's curb appeal with our professional exterior painting services. Premium paints rated for Colorado's demanding climate.</p></div>
+				<div class="service-card"><div class="service-card-icon">🎨</div><h3>Interior Painting</h3><p>Refresh your living spaces with expert interior painting. Clean lines, smooth finishes, and zero-VOC paints for a healthy home.</p></div>
+				<div class="service-card"><div class="service-card-icon">🪵</div><h3>Cabinet Painting</h3><p>Give your kitchen a complete makeover without the cost of replacement. Factory-smooth finishes that last for years.</p></div>
+				<div class="service-card"><div class="service-card-icon">🪜</div><h3>Fence &amp; Deck Staining</h3><p>Protect and beautify your outdoor wood surfaces with professional staining and sealing services.</p></div>
+				<div class="service-card"><div class="service-card-icon">🏢</div><h3>Commercial Painting</h3><p>Professional painting for offices, retail spaces, and commercial buildings. Minimal disruption, maximum impact.</p></div>
+			</div>
+		</div>
+	</section>
 
-	.featured-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: var(--spacing-8);
-		align-items: center;
-	}
+	<!-- Trust Badges -->
+	<section class="section">
+		<div class="section-inner">
+			<div class="trust-row">
+				<div class="trust-badge"><div class="trust-badge-icon">🏆</div><div class="trust-badge-text">BBB Accredited</div></div>
+				<div class="trust-badge"><div class="trust-badge-icon">⭐</div><div class="trust-badge-text">Nextdoor Faves 2022–2025</div></div>
+				<div class="trust-badge"><div class="trust-badge-icon">🛡️</div><div class="trust-badge-text">Fully Licensed &amp; Insured</div></div>
+				<div class="trust-badge"><div class="trust-badge-icon">✅</div><div class="trust-badge-text">500+ Projects Completed</div></div>
+			</div>
+		</div>
+	</section>
 
-	.featured-image-link {
-		grid-column: 1 / 3;
-		display: block;
-		/* Extend to viewport edge, but cap at -6rem minimum extension */
-		margin-left: min(
-			-6rem,
-			calc(-1 * (var(--spacing-6) + (100vw - var(--wide-width)) / 2))
-		);
-	}
+	<!-- Testimonials Section -->
+	<section class="section section-alt" id="reviews">
+		<div class="section-inner">
+			<div class="section-header">
+				<h2>What Our Customers Say</h2>
+				<div class="section-divider"></div>
+				<p>We let our work speak for itself — but our customers like to speak up too.</p>
+			</div>
+			<div class="testimonials-grid">
+				<div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><p class="testimonial-quote">"Elk Horn Painting did an amazing job on our exterior! The crew was professional, on time, and the attention to detail was outstanding."</p><div class="testimonial-author"><span class="testimonial-name">Sarah M.</span><span class="testimonial-source">Google</span></div></div>
+				<div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><p class="testimonial-quote">"We hired Elk Horn to paint our entire interior - 12 rooms! They were incredibly organized and the result exceeded our expectations."</p><div class="testimonial-author"><span class="testimonial-name">David R.</span><span class="testimonial-source">Google</span></div></div>
+				<div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><p class="testimonial-quote">"Best cabinet painting experience ever. They transformed our dated oak cabinets into beautiful modern white ones. Looks like new cabinets!"</p><div class="testimonial-author"><span class="testimonial-name">Jennifer K.</span><span class="testimonial-source">Nextdoor</span></div></div>
+				<div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><p class="testimonial-quote">"Elk Horn stained our fence and deck and they look brand new. Great price, great communication, and perfect cleanup."</p><div class="testimonial-author"><span class="testimonial-name">Mike T.</span><span class="testimonial-source">Angi</span></div></div>
+				<div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><p class="testimonial-quote">"We had our office suite painted over a weekend and Monday morning it was perfect. No smell, no mess, just beautiful new walls."</p><div class="testimonial-author"><span class="testimonial-name">Lisa H.</span><span class="testimonial-source">Yelp</span></div></div>
+			</div>
+		</div>
+	</section>
 
-	.featured-image {
-		overflow: hidden;
-		border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-		background: var(--color-surface);
-	}
+	<!-- CTA Banner -->
+	<section class="cta-banner">
+		<div class="section-inner">
+			<h2>Ready to Transform Your Space?</h2>
+			<p>Call us today for a free, no-obligation estimate. We'd love to hear about your project.</p>
+			<a href="tel:7205071738" class="cta-btn">Call (720) 507-1738</a>
+		</div>
+	</section>
 
-	.featured-image img {
-		width: 100%;
-		height: auto;
-		aspect-ratio: 4 / 3;
-		object-fit: cover;
-		transition: transform 0.4s ease;
-	}
+	<!-- Contact Section -->
+	<section class="section" id="contact">
+		<div class="section-inner">
+			<div class="section-header">
+				<h2>Get In Touch</h2>
+				<div class="section-divider"></div>
+			</div>
+			<div class="contact-grid">
+				<div class="contact-info">
+					<h3>Contact Information</h3>
+					<div class="contact-item"><div class="contact-icon">📞</div><div><strong>Phone</strong><p><a href="tel:7205071738">(720) 507-1738</a></p></div></div>
+					<div class="contact-item"><div class="contact-icon">✉️</div><div><strong>Email</strong><p><a href="mailto:office@elkhornpainting.com">office@elkhornpainting.com</a></p></div></div>
+					<div class="contact-item"><div class="contact-icon">📍</div><div><strong>Service Areas</strong><p>Castle Rock, CO • Denver Metro Area</p></div></div>
+					<div class="contact-item"><div class="contact-icon">🕐</div><div><strong>Hours</strong><p>Monday – Saturday: 7:00 AM – 6:00 PM</p></div></div>
+				</div>
+				<div class="contact-form-wrap">
+					<div class="lead-form">
+						<h3>Send Us a Message</h3>
+						<p class="form-sub">We respond within 24 hours</p>
+						<form>
+							<div class="form-group"><input type="text" placeholder="Your Name" required /></div>
+							<div class="form-group"><input type="tel" placeholder="Phone Number" required /></div>
+							<div class="form-group"><input type="email" placeholder="Email Address" /></div>
+							<div class="form-group"><textarea rows="4" placeholder="How can we help?"></textarea></div>
+							<button type="submit" class="btn-submit">Send Message →</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-	.featured-image-link:hover .featured-image img,
-	.featured-grid:has(.featured-title-link:hover) .featured-image img {
-		transform: scale(1.02);
-	}
+	<!-- Footer -->
+	<footer class="site-footer">
+		<div class="footer-inner">
+			<div class="footer-grid">
+				<div class="footer-brand">
+					<div class="footer-logo-text">ELK HORN PAINTING</div>
+					<p>Professional painting services in Castle Rock & Denver, Colorado.</p>
+					<p>Licensed & Insured</p>
+				</div>
+				<div class="footer-nav">
+					<h4>Services</h4>
+					<ul>
+						<li><a href="#services">Exterior Painting</a></li>
+						<li><a href="#services">Interior Painting</a></li>
+						<li><a href="#services">Cabinet Painting</a></li>
+						<li><a href="#services">Fence & Deck Staining</a></li>
+						<li><a href="#services">Commercial Painting</a></li>
+					</ul>
+				</div>
+				<div class="footer-nav">
+					<h4>Contact</h4>
+					<ul>
+						<li><a href="tel:7205071738">(720) 507-1738</a></li>
+						<li><a href="mailto:office@elkhornpainting.com">office@elkhornpainting.com</a></li>
+						<li>Castle Rock, CO</li>
+						<li>Denver Metro Area</li>
+					</ul>
+				</div>
+			</div>
+			<div class="footer-bottom">
+				<p>&copy; 2025 Elk Horn Painting. All rights reserved.</p>
+				<p class="powered-by">Powered by <a href="https://emdashcms.com">EmDash</a></p>
+			</div>
+		</div>
+	</footer>
 
-	.featured-content {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-4);
-	}
-
-	.featured-meta {
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		column-gap: var(--spacing-3);
-		row-gap: var(--spacing-1);
-		font-size: var(--font-size-sm);
-		color: var(--color-muted);
-	}
-
-	.meta-dot {
-		width: 3px;
-		height: 3px;
-		border-radius: 50%;
-		background: var(--color-muted);
-	}
-
-	/* Featured bylines */
-	.featured-bylines {
-		display: flex;
-		align-items: center;
-		gap: 2px;
-	}
-
-	.featured-byline {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--spacing-2);
-	}
-
-	.featured-byline-avatar {
-		width: var(--avatar-size-md);
-		height: var(--avatar-size-md);
-		border-radius: 50%;
-		object-fit: cover;
-	}
-
-	.featured-byline-name {
-		font-weight: 500;
-		color: var(--color-text-secondary);
-	}
-
-	.byline-sep {
-		color: var(--color-muted);
-		margin-right: 2px;
-	}
-
-	.byline-more {
-		font-size: var(--font-size-xs);
-		color: var(--color-muted);
-		margin-left: 2px;
-	}
-
-	.featured-title-link {
-		text-decoration: none;
-		color: inherit;
-	}
-
-	.featured-title {
-		font-size: clamp(var(--font-size-2xl), 4vw, var(--font-size-4xl));
-		font-weight: 700;
-		line-height: var(--leading-tight);
-		letter-spacing: var(--tracking-tight);
-		transition: color var(--transition-fast);
-	}
-
-	.featured-title-link:hover .featured-title,
-	.featured-grid:has(.featured-image-link:hover) .featured-title {
-		color: var(--color-accent);
-	}
-
-	.featured-excerpt {
-		font-size: var(--font-size-lg);
-		line-height: var(--leading-relaxed);
-		color: var(--color-text-secondary);
-	}
-
-	.featured-tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--spacing-2);
-		margin-top: var(--spacing-2);
-	}
-
-	.featured-tag {
-		display: inline-block;
-		padding: var(--spacing-1) var(--spacing-3);
-		font-size: var(--font-size-sm);
-		color: var(--color-text-secondary);
-		background: var(--color-surface);
-		border-radius: var(--radius);
-		text-decoration: none;
-		transition:
-			color var(--transition-fast),
-			background var(--transition-fast);
-	}
-
-	.featured-tag:hover {
-		color: var(--color-text);
-		background: var(--color-border);
-	}
-
-	/* Section header */
-	.section-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		margin-bottom: var(--spacing-8);
-		padding-bottom: var(--spacing-4);
-		border-bottom: 1px solid var(--color-border-subtle);
-	}
-
-	.section-title {
-		font-size: var(--font-size-sm);
-		font-weight: 500;
-		text-transform: uppercase;
-		letter-spacing: var(--tracking-wider);
-		color: var(--color-muted);
-	}
-
-	.section-link {
-		font-size: var(--font-size-sm);
-		color: var(--color-accent);
-		text-decoration: none;
-		transition: color var(--transition-fast);
-	}
-
-	.section-link:hover {
-		color: var(--color-accent-hover);
-	}
-
-	/* Posts Grid */
-	.posts-section {
-	}
-
-	.posts-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: var(--spacing-12) var(--spacing-8);
-	}
-
-	/* Empty State */
-	.empty-state {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: var(--spacing-3);
-		text-align: center;
-		padding: var(--spacing-20) var(--spacing-6);
-		max-width: 400px;
-		margin: 0 auto;
-	}
-
-	.empty-state h2 {
-		font-size: var(--font-size-2xl);
-		font-weight: 600;
-	}
-
-	.empty-state p {
-		color: var(--color-muted);
-	}
-
-	.btn {
-		display: inline-block;
-		margin-top: var(--spacing-4);
-		padding: var(--spacing-3) var(--spacing-6);
-		background: var(--color-accent);
-		color: var(--color-on-accent);
-		text-decoration: none;
-		border-radius: var(--radius);
-		font-size: var(--font-size-sm);
-		font-weight: 500;
-		transition: background var(--transition-fast);
-	}
-
-	.btn:hover {
-		background: var(--color-accent-hover);
-	}
-
-	/* Responsive */
-	@media (max-width: 900px) {
-		.home-content {
-			padding: var(--spacing-6) var(--spacing-4) var(--spacing-12);
-		}
-
-		.featured-image-link {
-			margin-left: 0;
-		}
-
-		.featured-grid {
-			grid-template-columns: 1fr;
-			gap: var(--spacing-6);
-		}
-
-		.featured-image {
-			border-radius: var(--radius-lg);
-		}
-
-		.featured-image img {
-			aspect-ratio: 16 / 9;
-		}
-
-		.posts-grid {
-			grid-template-columns: repeat(2, 1fr);
-			gap: var(--spacing-8) var(--spacing-6);
-		}
-	}
-
-	@media (max-width: 600px) {
-		.featured-title {
-			font-size: var(--font-size-2xl);
-		}
-
-		.posts-grid {
-			grid-template-columns: 1fr;
-			gap: var(--spacing-8);
-		}
-	}
-</style>
+	<EmDashBodyEnd context={pageCtx} />
+</body>
+</html>
