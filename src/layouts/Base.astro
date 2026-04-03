@@ -1,7 +1,5 @@
 ---
-import { getMenu, getEmDashCollection } from "emdash";
 import {
-	WidgetArea,
 	EmDashHead,
 	EmDashBodyStart,
 	EmDashBodyEnd,
@@ -12,46 +10,20 @@ import "../styles/elkhorn.css";
 interface Props {
 	title: string;
 	description?: string | null;
-	image?: string | null;
-	canonical?: string | null;
-	robots?: string | null;
-	type?: "website" | "article";
-	publishedTime?: string | null;
-	modifiedTime?: string | null;
-	author?: string | null;
 	content?: { collection: string; id: string; slug?: string | null };
 }
 
-const {
-	title,
-	description,
-	image,
-	canonical,
-	robots,
-	type = "website",
-	publishedTime,
-	modifiedTime,
-	author,
-	content: contentRef,
-} = Astro.props;
+const { title, description, content: contentRef } = Astro.props;
 
 const siteTitle = "Elk Horn Painting";
 const fullTitle = title?.includes(siteTitle) ? title : `${title} — ${siteTitle}`;
 
-const menu = await getMenu("primary");
-const { entries: pages } = await getEmDashCollection("pages");
-
 const pageCtx = createPublicPageContext({
 	Astro,
 	kind: contentRef ? "content" : "custom",
-	pageType: type,
+	pageType: "website",
 	title: fullTitle,
 	description,
-	canonical,
-	image,
-	content: contentRef,
-	seo: { ogImage: image, robots },
-	articleMeta: { publishedTime, modifiedTime, author },
 	siteName: siteTitle,
 });
 

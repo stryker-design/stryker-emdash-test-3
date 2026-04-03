@@ -1,13 +1,8 @@
 ---
-import { getEmDashCollection } from "emdash";
 import Base from "../layouts/Base.astro";
-
-// Fetch services and testimonials from emdash CMS
-const { entries: services } = await getEmDashCollection("services");
-const { entries: testimonials } = await getEmDashCollection("testimonials");
 ---
 
-<Base title="Professional Painting Services" description="Elk Horn Painting — Professional painting services in Castle Rock & Denver, Colorado. Exterior, interior, cabinet painting and more.">
+<Base title="Professional Painting Services" description="Elk Horn Painting — Professional painting services in Castle Rock & Denver, Colorado.">
 	
 	<!-- Hero Section -->
 	<section class="hero">
@@ -24,7 +19,7 @@ const { entries: testimonials } = await getEmDashCollection("testimonials");
 					premium materials, and attention to detail since day one.
 				</p>
 				<div class="hero-badges">
-					<div class="hero-badge">✓ Licensed & Insured</div>
+					<div class="hero-badge">✓ Licensed &amp; Insured</div>
 					<div class="hero-badge">✓ Free Estimates</div>
 					<div class="hero-badge">✓ 5-Star Rated</div>
 				</div>
@@ -46,9 +41,11 @@ const { entries: testimonials } = await getEmDashCollection("testimonials");
 					<div class="form-group">
 						<select>
 							<option value="">Select Service Needed</option>
-							{services.map(s => (
-								<option value={s.data.name}>{s.data.name}</option>
-							))}
+							<option value="exterior">Exterior Painting</option>
+							<option value="interior">Interior Painting</option>
+							<option value="cabinet">Cabinet Painting</option>
+							<option value="staining">Fence &amp; Deck Staining</option>
+							<option value="commercial">Commercial Painting</option>
 						</select>
 					</div>
 					<div class="form-group">
@@ -69,15 +66,31 @@ const { entries: testimonials } = await getEmDashCollection("testimonials");
 				<p>From interior refreshes to full exterior transformations — we do it all with precision and care.</p>
 			</div>
 			<div class="services-grid">
-				{services.map(service => (
-					<div class="service-card">
-						<div class="service-card-icon">
-							{service.data.icon || "🎨"}
-						</div>
-						<h3>{service.data.name}</h3>
-						<p>{service.data.description}</p>
-					</div>
-				))}
+				<div class="service-card">
+					<div class="service-card-icon">🏠</div>
+					<h3>Exterior Painting</h3>
+					<p>Transform your home's curb appeal with our professional exterior painting services. We use premium paints rated for Colorado's demanding climate.</p>
+				</div>
+				<div class="service-card">
+					<div class="service-card-icon">🎨</div>
+					<h3>Interior Painting</h3>
+					<p>Refresh your living spaces with expert interior painting. Clean lines, smooth finishes, and zero-VOC paints for a healthy home.</p>
+				</div>
+				<div class="service-card">
+					<div class="service-card-icon">🪵</div>
+					<h3>Cabinet Painting</h3>
+					<p>Give your kitchen a complete makeover without the cost of replacement. Factory-smooth finishes that last for years.</p>
+				</div>
+				<div class="service-card">
+					<div class="service-card-icon">🪜</div>
+					<h3>Fence &amp; Deck Staining</h3>
+					<p>Protect and beautify your outdoor wood surfaces with professional staining and sealing services.</p>
+				</div>
+				<div class="service-card">
+					<div class="service-card-icon">🏢</div>
+					<h3>Commercial Painting</h3>
+					<p>Professional painting for offices, retail spaces, and commercial buildings. Minimal disruption, maximum impact.</p>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -96,7 +109,7 @@ const { entries: testimonials } = await getEmDashCollection("testimonials");
 				</div>
 				<div class="trust-badge">
 					<div class="trust-badge-icon">🛡️</div>
-					<div class="trust-badge-text">Fully Licensed & Insured</div>
+					<div class="trust-badge-text">Fully Licensed &amp; Insured</div>
 				</div>
 				<div class="trust-badge">
 					<div class="trust-badge-icon">✅</div>
@@ -115,20 +128,46 @@ const { entries: testimonials } = await getEmDashCollection("testimonials");
 				<p>We let our work speak for itself — but our customers like to speak up too.</p>
 			</div>
 			<div class="testimonials-grid">
-				{testimonials.map(t => (
-					<div class="testimonial-card">
-						<div class="testimonial-stars">
-							{"★".repeat(t.data.rating || 5)}
-						</div>
-						<p class="testimonial-quote">"{t.data.quote}"</p>
-						<div class="testimonial-author">
-							<span class="testimonial-name">{t.data.author_name}</span>
-							{t.data.source && (
-								<span class="testimonial-source">{t.data.source}</span>
-							)}
-						</div>
+				<div class="testimonial-card">
+					<div class="testimonial-stars">★★★★★</div>
+					<p class="testimonial-quote">"Elk Horn Painting did an amazing job on our exterior! The crew was professional, on time, and the attention to detail was outstanding. Our neighbors keep complimenting our house!"</p>
+					<div class="testimonial-author">
+						<span class="testimonial-name">Sarah M.</span>
+						<span class="testimonial-source">Google</span>
 					</div>
-				))}
+				</div>
+				<div class="testimonial-card">
+					<div class="testimonial-stars">★★★★★</div>
+					<p class="testimonial-quote">"We hired Elk Horn to paint our entire interior - 12 rooms! They were incredibly organized and the finished result exceeded our expectations. Highly recommend!"</p>
+					<div class="testimonial-author">
+						<span class="testimonial-name">David R.</span>
+						<span class="testimonial-source">Google</span>
+					</div>
+				</div>
+				<div class="testimonial-card">
+					<div class="testimonial-stars">★★★★★</div>
+					<p class="testimonial-quote">"Best cabinet painting experience ever. They transformed our dated oak cabinets into beautiful modern white ones. The finish is so smooth — looks like new cabinets!"</p>
+					<div class="testimonial-author">
+						<span class="testimonial-name">Jennifer K.</span>
+						<span class="testimonial-source">Nextdoor</span>
+					</div>
+				</div>
+				<div class="testimonial-card">
+					<div class="testimonial-stars">★★★★★</div>
+					<p class="testimonial-quote">"Elk Horn stained our fence and deck and they look brand new. Great price, great communication, and the crew cleaned up everything perfectly."</p>
+					<div class="testimonial-author">
+						<span class="testimonial-name">Mike T.</span>
+						<span class="testimonial-source">Angi</span>
+					</div>
+				</div>
+				<div class="testimonial-card">
+					<div class="testimonial-stars">★★★★★</div>
+					<p class="testimonial-quote">"We had our office suite painted over a weekend and Monday morning it was perfect. No smell, no mess, just beautiful new walls. Very professional team."</p>
+					<div class="testimonial-author">
+						<span class="testimonial-name">Lisa H.</span>
+						<span class="testimonial-source">Yelp</span>
+					</div>
+				</div>
 			</div>
 		</div>
 	</section>
